@@ -1,0 +1,103 @@
+---
+title: "class10: Structural Bioinformatics pt 2"
+author: "Kaitlyn Madriaga, A17217752"
+format: html
+editor: visual
+---
+
+## Comparative Structure Analysis of Adenylate Kinase
+
+> Q10. Which of the structures is found only in Bioconductor and not CRAN?
+
+msn
+
+> Q11. Which of the packages is not found on Bioconductor or CRAN?
+
+bio3d-view
+
+> Q12. True or False? Functions from the devtools package can be used to install packages from GitHub and BitBucket?
+
+TRUE
+
+```{r}
+library(bio3d)
+aa<- get.seq("1ake_A")
+```
+
+
+> Q13. How many amino acids are in this sequence/ How long is this sequence? 
+
+214
+
+```{r}
+#Blast or hmmer search 
+b <- blast.pdb(aa)
+```
+```{r}
+# Plot a summary of search results
+hits <- plot(b)
+```
+```{r}
+# List out some 'top hits'
+head(hits$pdb.id)
+```
+```{r}
+# Download releated PDB files
+files <- get.pdb(hits$pdb.id, path="pdbs", split=TRUE, gzip=TRUE)
+```
+
+```{r}
+# Align releated PDBs
+pdbs <- pdbaln(files, fit = TRUE, exefile="msa")
+```
+
+```{r}
+# Vector containing PDB codes for figure axis
+ids <- basename.pdb(pdbs$id)
+
+# Draw schematic alignment
+plot(pdbs, labels=ids)
+```
+
+```{r}
+anno <- pdb.annotate(ids)
+unique(anno$source)
+```
+# Principal Component Analysis
+
+`pca` is used to transform a data set down to a few important components that describe the directions where there is most variance. In terms of protein structures, PCA is used to capture major structural variations within an ensemble of structures.
+
+```{r}
+pc.xray <- pca(pdbs)
+plot(pc.xray)
+```
+Each dot represents one PDB structure
+
+`rmsd()` will calculate all pairwise RMSD values of the structural ensemble. This facilitates clustering analysis based on the pairwise structural deviation:
+
+```{r}
+# Calculate RMSD
+rd <- rmsd(pdbs)
+
+# Structure-based clustering
+hc.rd <- hclust(dist(rd))
+grps.rd <- cutree(hc.rd, k=3)
+
+plot(pc.xray, 1:2, col="grey50", bg=grps.rd, pch=21, cex=1)
+```
+
+We can visualize the first PCA component using `mktrj`
+
+```{r}
+pc1 <- mktrj(pc.xray, pc=1, file="pc_1.pdb")
+```
+
+```{r}
+# NMA of all structures
+modes <- nma(pdbs)
+plot(modes, pdbs, col=grps.rd)
+
+```
+> Q14. What do you note about this plot? Are the black and colored lines similar or different? Where do you think they differ most and why?
+
+The black and colored lines have similar shapes, though there are greater fluctuations in the colored lines.  They seem to differ most where there 
