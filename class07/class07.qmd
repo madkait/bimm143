@@ -1,0 +1,172 @@
+---
+title: "Class 7: Clustering and PCA"
+author: "Kaitlyn Madriaga"
+format: pdf
+editor: visual
+---
+
+# Clustering 
+
+First, let's make up some data to cluster so we can get a feel for these methods and how to work with them. 
+
+We can use the 'rnorm()" function to get random numbers from a Normal distribution around a given 'mean' with a given 'standard distribution'. 
+```{r}
+hist(rnorm(5000, mean = 3))
+```
+
+Let's get 30 points with a mean of 3. 
+
+```{r}
+tmp <- c(rnorm(30, mean = 3), rnorm(30, mean = -3)) 
+tmp
+```
+
+Put the two of these together: 
+```{r}
+x <- cbind(tmp, rev(tmp))
+x
+plot(x)
+```
+
+## K-means clustering
+
+Very popular clustering method that we can use with the 'kmeans()' function in base R. 
+```{r}
+km <- kmeans(x, centers = 2)
+km
+```
+
+
+```{r}
+km$size
+```
+>Q. How many points are in each cluster? 
+
+30
+
+>Q. What 'component' of your result object details
+
+- cluster size? 
+```{r}
+km$size
+```
+  
+- cluster assignment/membership?
+```{r}
+km$cluster
+```
+
+- cluster center? 
+```{r}
+km$centers
+```
+
+```{r}
+mycols <- km$cluster
+plot(x, col = mycols)
+points(km$center, col = 'blue', pch = 15, cex = 3)
+```
+
+>Q. Let's cluster into 3 groups or same 'x' data and make a plot 
+
+```{r}
+km <- kmeans(x, centers = 3)
+plot(x, col= km$cluster)
+```
+
+## Hierarchical Clustering 
+
+We can use the 'hclust()' function for Hierarchical Clustering. 
+Unlike 'kmeans()', where we could just pass in our data as input, we need to give 'hclust()' a "distance matrix".  
+
+
+We will use the 'dist()' function to start with. 
+```{r}
+d <- dist(x)
+hc <- hclust(d)
+hc
+```
+
+```{r}
+plot(hc)
+```
+
+I can now "cut" my tree with the 'cutree()' to yield a cluster membership vector. 
+
+```{r}
+grps <- cutree(hc, h = 8)
+grps
+```
+
+You can also tell 'cutree()' to cut where it yields "k" groups. 
+
+```{r}
+cutree(hc, k=2)
+```
+```{r}
+plot(x, col=grps)
+```
+
+# Principal Component Analysis (PCA)
+
+##PCA of UK food data
+
+```{r}
+url <- "https://tinyurl.com/UK-foods"
+#use row.names to remove the first column, so that the food names aren't a column 
+x <- read.csv(url, row.names=1)
+dim(x)
+head(x)
+```
+
+
+>Q1. How many rows and columns are in your new data frame named x? What R functions could you use to answer this questions?
+
+17 rows and 4 columns 
+
+>Q2. Which approach to solving the ‘row-names problem’ mentioned above do you prefer and why? Is one approach more robust than another under certain circumstances?
+
+Using row.names in read.csv is better because the info can be altered when using the other approach 
+
+```{r}
+barplot(as.matrix(x), beside=T, col=rainbow(nrow(x)))
+```
+
+>Q3: Changing what optional argument in the above barplot() function results in the following plot?
+
+```{r}
+barplot(as.matrix(x), beside=F, col=rainbow(nrow(x)))
+```
+
+>Q5: Generating all pairwise plots may help somewhat. Can you make sense of the following code and resulting figure? What does it mean if a given point lies on the diagonal for a given plot?
+
+```{r}
+pairs(x, col=rainbow(10), pch=16)
+```
+These are pairs of countries plotted against each other.  The country going across is the y-axis for the plot, while the country going down is the x-axis for the plot.  e.g. the plot with "England" to the left and "Wales" below is a plot of Wales x England, where Wales = x-axis and England = y-axis.  The plot where "Wales" is to the right of the plot has the reverse, where Wales = y-axis and England = x-axis. 
+
+If the point lies on the diagonal, it means both countries have the same amount. 
+If it is above the diagonal, the country on the y-axis has more of it than the country on the x-axis.  
+
+> Q6. What is the main differences between N. Ireland and the other countries of the UK in terms of this data-set?
+
+The blue point 
+
+
+The main PCA function in base R is called 'prcomp' it expects the transpose of our data. 
+
+```{r}
+pca <- prcomp(t(x))
+summary(pca)
+attributes(pca)
+```
+
+> Q7. Complete the code below to generate a plot of PC1 vs PC2. The second line adds text labels over the data points.
+
+```{r}
+plot(pca$x[,1], pca$x[,2], xlab="PC1", ylab="PC2", xlim=c(-270,500),
+     col=c("orange", "red", "blue", "darkgreen"),
+     pch=16)
+text(pca$x[,1], pca$x[,2], colnames(x))
+```
+
