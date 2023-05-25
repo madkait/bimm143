@@ -1,0 +1,117 @@
+---
+title: "class06_"
+author: "Kaitlyn Madriaga, PID: A17217752"
+format: html
+editor: visual
+---
+
+# (A. Can you improve this analysis code?
+```{r}
+# (A. Can you improve this analysis code?
+df <- data.frame(a=1:10, b=seq(200,400,length=10),c=11:20,d=NA)
+df$a <- (df$a - min(df$a)) / (max(df$a) - min(df$a))
+df$b <- (df$b - min(df$b)) / (max(df$b) - min(df$b))
+df$c <- (df$c - min(df$c)) / (max(df$c) - min(df$c))
+df$d <- (df$d - min(df$d)) / (max(df$d) - min(df$d)) 
+
+```
+
+1) look for copy and paste errors 
+2) start with a working code snippet, simplify, reduce calculation duplication
+```{r}
+#Simplify to work with a generic vector "x"
+x <- (x - min(x)) / (max(x) - min(x))
+
+#Note that we call the min() function twice... 
+xmin <- min(x)
+x <- (x - xmin) / (max(x) - xmin)
+
+#Can further optimize by using the range() function:
+rng <- range(x)
+x <- (x - rng[1]) / (rng[2] - rng[1])
+
+```
+
+create a function: 
+```{r}
+rescale <- function(x) {
+  rng <- range(x)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+
+#Test on a small example where you know the answer rescale(1:10)
+```
+
+
+
+```{r}
+# Can you improve this analysis code?
+library(bio3d)
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor")
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor")
+
+```
+
+>Q1. What type of object is returned from the read.pdb() function? 
+
+It returns a list with the following components: 
+-**atom**, df containing all atomic coordinate atom + hetatom data 
+-**helix**, the start, end, and length of H type 
+-**sheet**, 'start', 'end' and 'length' of E type 
+-**seqres**, sequence from SEQRES field 
+-**xyz**, a numeric matrix with ATOM and HETATM coordinate data
+-**calpha**, a logical vector with length = nrow(atom)
+-**remark**,a list object containing info taken from 'REMARK' records of a protein data base 
+-**call**, the matched call 
+
+>Q2. What does the trim.pdb() function do?
+
+It produces a smaller PDB object containing a subset of atoms from a larger PDB object 
+
+>Q3. What input parameter would turn off the marginal black and grey rectangles in the plots and what do they represent in this case?
+
+removing sse, or sse = NULL would turn off the marginal black and grey rectangles, which represent the degree of regularity in the structure 
+
+>Q4. What would be a better plot to compare across the different proteins?
+
+a dendogram? 
+
+>Q5. Which proteins are more similar to each other in their B-factor trends. How could you quantify this? HINT: try the rbind(), dist() and hclust() functions together with a resulting dendrogram plot. Look up the documentation to see what each of these functions does.
+
+s1.b and s3.b are more similar to each other 
+```{r}
+hc <- hclust( dist( rbind(s1.b, s2.b, s3.b) ) )
+plot(hc)
+```
+
+chain = chain identifier 
+b = temperature factor / measure of thermal motion of atoms in a protein 
+elety = atom type 
+
+working code snippet
+```{r}
+#Simplify to work with generic vector x
+#read.pdb reads a protein data bank (PDB) coordinate file, returns a list with components of the structure 
+x <- read.pdb(protein.id)
+
+#trim.pdb produces a subset of atoms from the given PDB file 
+#in this case, extracts chain A from the protein and only keeps C-alpha (CA) atoms
+x.chainA <- trim.pdb(x, chain = "A", elety = "CA" )
+
+#extracts the B-factors of the C-alpha atoms 
+x.b <- x.chainA$atom$b
+
+#plots the B-factor with secondary structure elements shown as shaded regions
+plotb3(x.b, sse=x.chainA, typ= "l", ylab = "Bfactor")
+```
+
