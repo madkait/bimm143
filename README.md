@@ -18,4 +18,4 @@ From class [BIMM143](https://bioboot.github.io/bimm143_S23/)
 - Class 13: [**RNA-Seq mini-project**](https://github.com/madkait/bimm143/blob/main/class13/class13-rna-seq.pdf) [source code](https://github.com/madkait/bimm143/blob/main/class13/class13-rna-seq.qmd)
   - Differential expression analysis project with DESeq2 followed by gene enrichment and functional annotation with KEGG, InterPro, and GO ontologies.
 - Class 17: [**Investigating Pertussis Resurgence mini-project**](https://github.com/madkait/bimm143/blob/main/class17/lab19.pdf) [source code](https://github.com/madkait/bimm143/blob/main/class17/lab19.qmd)
-  -Uses web-scraping, JSON based APIs, and advanced dplyr and ggplot to investigate brand new datasets associated with pertussis cases and longitudinal RNA-seq on the immune response to vaccination
+  - Uses web-scraping, JSON based APIs, and advanced dplyr and ggplot to investigate brand new datasets associated with pertussis cases and longitudinal RNA-seq on the immune response to vaccination
